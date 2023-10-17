@@ -32,8 +32,33 @@ def save_discover_weekly():
     except:
         print("User not logged in")
         return redirect("/")
-    
-    return("OAUTH SUCCESSFUL")
+
+    sp = spotipy.Spotify(auth=token_info["access_token"])
+    saved_weekly_playlist_id = None
+    discover_weekly_playlist_id = None
+
+    current_playlists = sp.current_user_playlists()["items"]    # Get all of user's playlists
+    # Search for Discover Weekly or Saved Weekly
+    for playlist in current_playlists:
+        if(playlist["name"] == "Discover Weekly"):
+            discover_weekly_playlist_id = playlist["id"]
+        if(playlist["name"] == "Saved Weekly"):
+            saved_weekly_playlist_id = playlist["id"]
+        
+        # If Discover Weekly not found
+        if not discover_weekly_playlist_id:
+            return "Discover Weekly not found"
+        if not saved_weekly_playlist_id:
+            new_playlist = sp.user_playlist_create(user_id, "Saved Weekly", True)
+            saved_weekly_playlist_id = new_playlist["id"]
+        
+        discover_weekly_playlist = sp.play_items(discover_weekly_playlist_id)
+        song_uris = []
+        for song in discover_weekly_playlist["items"]:  # Add all songs from Discover Weekly into a list
+            song_uri = song["track"]["uri"]
+            song_uris.append(song_uri)
+        user_id = sp.current_user()["id"]
+        sp.user_playlist_add_tracks(user_id, saved_weekly_playlist_id, song_uri)
 
 def get_token():
     token_info = session.get(TOKEN_INFO, None)
