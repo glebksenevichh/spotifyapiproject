@@ -1,6 +1,5 @@
 import spotipy
 import time 
-
 from spotipy.oauth2 import SpotifyOAuth # Used for authorizing user
 from flask import Flask, request, url_for, session, redirect    # Used to store user info and redirecting to various pages
 
@@ -23,7 +22,7 @@ def redirect_page():
     code = request.args.get('code')
     token_info = create_spotify_oauth().get_access_token(code) # Exchange authorization code for token
     session[TOKEN_INFO] = token_info # Saving the session's token info
-    return redirect(url_for("save_discover_weekly", external = True)) # Redirect to app
+    return redirect(url_for("save_discover_weekly", _external = True)) # Redirect to app
 
 @app.route('/saveDiscoverWeekly')
 def save_discover_weekly():
